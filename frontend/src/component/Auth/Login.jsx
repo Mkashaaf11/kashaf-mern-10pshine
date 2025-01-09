@@ -5,6 +5,7 @@ import Button from "./Button";
 import { Mail, Lock } from "lucide-react";
 import { login as loginService } from "../../services/authService";
 import AuthContext from "../../services/context/authContext";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -47,6 +48,11 @@ const Login = () => {
           />
         </div>
         <Button type="submit">Sign in</Button>
+        <div className="text-right">
+          <Link to="/forgot-password" className="text-blue-500 hover:underline">
+            Forgot Password?
+          </Link>
+        </div>
       </form>
     </AuthLayout>
   );
