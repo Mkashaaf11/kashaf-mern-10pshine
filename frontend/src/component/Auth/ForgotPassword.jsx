@@ -3,7 +3,7 @@ import AuthLayout from "./AuthLayout";
 import InputField from "./InputField";
 import Button from "./Button";
 import { Mail } from "lucide-react";
-import { forgotPassword } from "../../services/authService";
+//import { forgotPassword } from "../../services/authService";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -11,13 +11,13 @@ const ForgotPassword = () => {
   const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const { message } = await forgotPassword(email);
-      setSuccessMessage(message);
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to send reset email");
-    }
+    // e.preventDefault();
+    // try {
+    //   const { message } = await forgotPassword(email);
+    //   setSuccessMessage(message);
+    // } catch (err) {
+    //   setError(err.response?.data?.message || "Failed to send reset email");
+    // }
   };
 
   return (

@@ -4,11 +4,13 @@ import Auth from "../pages/AuthPage";
 import Dashboard from "../pages/Dashboard";
 import NotesPage from "../pages/NotesPage";
 import ErrorPage from "../component/Error/ErrorPage";
+import Home from "../pages/HomePage";
 
 function AppRoutes() {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={<Home />} />
         <Route path="/auth/*" element={<Auth />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/notes/*" element={<NotesPage />} />
