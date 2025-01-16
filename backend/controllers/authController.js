@@ -84,9 +84,8 @@ exports.forgotPassword = async (req, res) => {
     user.resetTokenExpiry = Date.now() + 3600000; // 1 hour expiry
     await user.save();
 
-    const resetUrl = `${req.protocol}://${req.get(
-      "host"
-    )}/api/auth/reset-password/${resetToken}`;
+    const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+    const resetUrl = `${FRONTEND_URL}/auth/reset-password/${resetToken}`;
     await sendEmail(
       email,
       "Password Reset",
