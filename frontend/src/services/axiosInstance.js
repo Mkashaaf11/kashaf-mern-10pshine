@@ -1,5 +1,5 @@
-// src/services/axiosInstance.js
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const API = axios.create({
   baseURL: "http://localhost:5000/api",
@@ -12,5 +12,19 @@ API.interceptors.request.use((config) => {
   }
   return config;
 });
+
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      const navigate = useNavigate();
+
+      localStorage.removeItem("token");
+
+      navigate("/login");
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default API;

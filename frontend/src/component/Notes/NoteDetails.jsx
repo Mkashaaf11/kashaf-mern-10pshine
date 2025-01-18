@@ -1,25 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { getNote } from "../../services/notesService";
 
 const NoteDetails = () => {
   const { noteId } = useParams();
   const navigate = useNavigate();
   const [note, setNote] = useState(null);
 
+  const fetchNoteDetails = async (id) => {
+    try {
+      const response = await getNote(id);
+      if (response.success) {
+        setNote(response.note);
+      } else {
+        console.error("Failed to fetch note:", response);
+      }
+      console.log("Fetched Note: ", response.note);
+    } catch (error) {
+      console.error("Error fetching note details:", error);
+    }
+  };
+
   useEffect(() => {
     if (noteId) {
       fetchNoteDetails(noteId);
     }
   }, [noteId]);
-
-  const fetchNoteDetails = async (id) => {
-    const mockNote = {
-      id,
-      title: "Sample Note Title",
-      content: "<p>This is the content of the note.</p>",
-    };
-    setNote(mockNote);
-  };
 
   if (!note) {
     return <div>Loading...</div>;

@@ -1,22 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { getNotes } from "../../services/notesService";
 
 const NotesList = () => {
   const [notes, setNotes] = useState([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchNotes();
+  const fetchNotes = useCallback(async () => {
+    try {
+      const response = await getNotes();
+      if (response.success) {
+        setNotes(response.notes);
+      } else {
+        console.error("Failed to fetch notes:", response);
+      }
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+    }
   }, []);
 
-  const fetchNotes = async () => {
-    // Mock API call
-    const mockNotes = [
-      { id: 1, title: "Note 1", content: "This is the first note" },
-      { id: 2, title: "Note 2", content: "This is the second note" },
-    ];
-    setNotes(mockNotes);
-  };
+  useEffect(() => {
+    fetchNotes();
+  }, [fetchNotes]);
 
   const handleAddNote = () => {
     navigate("/notes/add");
@@ -35,27 +40,30 @@ const NotesList = () => {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {notes.length > 0 ? (
+        {notes && notes.length > 0 ? (
           notes.map((note) => (
             <div
-              key={note.id}
+              key={note._id}
               className="bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition"
             >
               <h3 className="text-lg font-semibold text-gray-700">
                 {note.title}
               </h3>
-              <p className="text-gray-500 text-sm mt-2">
-                {note.content.substring(0, 50)}...
-              </p>
+              <div
+                className="text-gray-500 text-sm mt-2"
+                dangerouslySetInnerHTML={{
+                  __html: note.content.substring(0, 50) + "...",
+                }}
+              ></div>
               <div className="mt-4 flex justify-between items-center">
                 <button
-                  onClick={() => navigate(`/notes/${note.id}`)}
+                  onClick={() => navigate(`/notes/${note._id}`)}
                   className="text-blue-500 hover:underline"
                 >
                   View
                 </button>
                 <button
-                  onClick={() => navigate(`/notes/add/${note.id}`)}
+                  onClick={() => navigate(`/notes/add/${note._id}`)}
                   className="text-blue-500 hover:underline"
                 >
                   Edit

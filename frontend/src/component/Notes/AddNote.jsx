@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { addNote, editNote, getNote } from "../../services/notesService";
 
 const NoteEditor = () => {
   const { noteId } = useParams();
@@ -9,6 +10,20 @@ const NoteEditor = () => {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const fetchNoteData = async (id) => {
+    try {
+      const response = await getNote(id);
+      if (response.success) {
+        const note = response.note;
+        setTitle(note.title);
+        setContent(note.content);
+      } else {
+        console.error("Failed to fetch note:", response);
+      }
+    } catch (error) {
+      console.error("Error fetching note data:", error);
+    }
+  };
 
   useEffect(() => {
     if (noteId) {
@@ -16,22 +31,14 @@ const NoteEditor = () => {
     }
   }, [noteId]);
 
-  const fetchNoteData = async (id) => {
-    const mockNote = {
-      id,
-      title: "Sample Note",
-      content: "<p>This is an editable note.</p>",
-    };
-    setTitle(mockNote.title);
-    setContent(mockNote.content);
-  };
-
   const handleSave = async () => {
     const noteData = { title, content };
     if (noteId) {
       console.log("Updating note:", noteData);
+      editNote(noteData.title, noteData.content, noteId);
     } else {
       console.log("Creating new note:", noteData);
+      addNote(noteData.title, noteData.content);
     }
     navigate("/dashboard");
   };
