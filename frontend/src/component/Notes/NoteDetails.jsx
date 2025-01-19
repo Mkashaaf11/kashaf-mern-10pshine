@@ -1,23 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getNote } from "../../services/notesService";
+import { ArrowLeft, FileText, Edit3, Clock } from "lucide-react";
 
 const NoteDetails = () => {
   const { noteId } = useParams();
   const navigate = useNavigate();
   const [note, setNote] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchNoteDetails = async (id) => {
     try {
+      setLoading(true);
+      setError(null);
       const response = await getNote(id);
       if (response.success) {
         setNote(response.note);
       } else {
+        setError("Failed to fetch note details");
         console.error("Failed to fetch note:", response);
       }
-      console.log("Fetched Note: ", response.note);
     } catch (error) {
+      setError("Error loading note details");
       console.error("Error fetching note details:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -27,26 +35,103 @@ const NoteDetails = () => {
     }
   }, [noteId]);
 
-  if (!note) {
-    return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <FileText className="h-10 w-10 text-[#2ab6ac] mb-4 mx-auto animate-pulse" />
+          <p className="text-gray-600">Loading note...</p>
+        </div>
+      </div>
+    );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center text-red-500">
+          <p>{error}</p>
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="mt-4 text-[#2ab6ac] hover:text-[#239d94] flex items-center gap-2 mx-auto"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!note) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center text-gray-500">
+          <p>Note not found</p>
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="mt-4 text-[#2ab6ac] hover:text-[#239d94] flex items-center gap-2 mx-auto"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">{note.title}</h1>
-      </header>
-      <div
-        className="bg-white p-6 rounded-lg shadow-md"
-        dangerouslySetInnerHTML={{ __html: note.content }}
-      />
-      <div className="mt-4">
-        <button
-          onClick={() => navigate("/dashboard")}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-        >
-          Back to Dashboard
-        </button>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6 flex justify-between items-start">
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="flex items-center gap-2 text-gray-600 hover:text-[#2ab6ac] transition-colors duration-200"
+          >
+            <ArrowLeft className="h-5 w-5" />
+            Back to Dashboard
+          </button>
+          <button
+            onClick={() => navigate(`/notes/add/${noteId}`)}
+            className="flex items-center gap-2 text-[#2ab6ac] hover:text-[#239d94] transition-colors duration-200"
+          >
+            <Edit3 className="h-5 w-5" />
+            Edit Note
+          </button>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div className="p-6">
+            <h1 className="text-3xl font-bold text-gray-800 mb-4">
+              {note.title}
+            </h1>
+            <div className="flex items-center text-gray-500 text-sm mb-6">
+              <Clock className="h-4 w-4 mr-2" />
+              <span>Last updated: {formatDate(note.updatedAt)}</span>
+            </div>
+            <div
+              className="prose prose-lg max-w-none"
+              dangerouslySetInnerHTML={{ __html: note.content }}
+            />
+          </div>
+
+          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+            <div className="flex items-center text-gray-500 text-sm">
+              <FileText className="h-4 w-4 mr-2" />
+              <span>Created: {formatDate(note.createdAt)}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

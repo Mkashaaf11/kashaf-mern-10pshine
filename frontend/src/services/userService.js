@@ -15,9 +15,9 @@ export const addUser = async (name, email, password) => {
   return response.data;
 };
 
-export const updateUser = async (userId, name, email) => {
-  const response = await API.put(`/user/${userId}`, { name, email });
-  return response.data;
+export const updateUser = async (userId, updates) => {
+  const response = await API.put(`/user/${userId}`, updates);
+  return response.data.user;
 };
 
 export const deleteUser = async (userId) => {

@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useCallback } from "react";
-import { jwtDecode } from "jwt-decode"; // Removed curly braces around jwtDecode
+import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import API from "../axiosInstance";
 import { getUser } from "../userService";
@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }) => {
     async (userId) => {
       try {
         const userData = await getUser(userId);
+        console.log("userData:", userData);
 
         setUser(userData);
       } catch (err) {

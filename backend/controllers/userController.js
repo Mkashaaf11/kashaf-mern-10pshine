@@ -1,5 +1,6 @@
 const User = require("../models/user");
 const logger = require("../utils/logger");
+const bcrypt = require("bcrypt");
 
 // Get all users
 exports.getAllUsers = async (req, res) => {
@@ -37,25 +38,30 @@ exports.getUserById = async (req, res) => {
 // Update user
 exports.updateUser = async (req, res) => {
   const { id } = req.params;
-  const { name, email } = req.body;
+  const { name, email, oldPassword, newPassword } = req.body;
+
   try {
-    logger.info(`Updating user with ID: ${id}`);
     const user = await User.findById(id);
     if (!user) {
-      logger.warn(`User not found with ID: ${id}`);
       return res.status(404).json({ message: "User not found" });
     }
 
     user.name = name || user.name;
     user.email = email || user.email;
-    const updatedUser = await user.save();
 
-    logger.info(`User successfully updated with ID: ${id}`);
+    if (oldPassword && newPassword) {
+      const isMatch = await bcrypt.compare(oldPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: "Incorrect old password" });
+      }
+      user.password = await bcrypt.hash(newPassword, 10);
+    }
+
+    const updatedUser = await user.save();
     res
       .status(200)
       .json({ message: "User updated successfully", user: updatedUser });
   } catch (error) {
-    logger.error(`Error updating user with ID ${id}: ${error.message}`);
     res
       .status(500)
       .json({ message: "Error updating user", error: error.message });
