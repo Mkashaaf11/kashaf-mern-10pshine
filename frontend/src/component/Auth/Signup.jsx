@@ -4,6 +4,7 @@ import InputField from "./InputField";
 import Button from "./Button";
 import { Mail, Lock, User } from "lucide-react";
 import { signup as signupService } from "../../services/authService";
+import { Link } from "react-router-dom";
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -22,6 +23,7 @@ const Signup = () => {
       setError(err.response?.data?.message || "Signup failed");
     }
   };
+
   return (
     <AuthLayout title="Create your account">
       {error && <p className="text-red-500">{error}</p>}
@@ -49,6 +51,14 @@ const Signup = () => {
         />
         <Button type="submit">Create account</Button>
       </form>
+      <div className="mt-6 text-center">
+        <p className="text-gray-500">
+          Already have an account?{" "}
+          <Link to="/auth/login" className="text-blue-500 hover:underline">
+            Login here
+          </Link>
+        </p>
+      </div>
     </AuthLayout>
   );
 };

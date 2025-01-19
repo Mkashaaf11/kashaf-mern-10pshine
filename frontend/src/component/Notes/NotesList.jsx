@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { getNotes } from "../../services/notesService";
+import { getNotes, removeNote } from "../../services/notesService";
 
 const NotesList = () => {
   const [notes, setNotes] = useState([]);
@@ -68,7 +68,27 @@ const NotesList = () => {
                 >
                   Edit
                 </button>
-                <button className="text-red-500 hover:underline">Delete</button>
+                <button
+                  onClick={async () => {
+                    try {
+                      const response = await removeNote(note._id);
+                      if (response.success) {
+                        setNotes((prevNotes) =>
+                          prevNotes.filter(
+                            (currentNote) => currentNote._id !== note._id
+                          )
+                        );
+                      } else {
+                        console.error("Failed to delete note:", response);
+                      }
+                    } catch (error) {
+                      console.error("Error deleting note:", error);
+                    }
+                  }}
+                  className="text-red-500 hover:underline"
+                >
+                  Delete
+                </button>
               </div>
             </div>
           ))

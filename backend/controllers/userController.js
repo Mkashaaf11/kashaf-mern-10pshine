@@ -1,0 +1,85 @@
+const User = require("../models/user");
+const logger = require("../utils/logger");
+
+// Get all users
+exports.getAllUsers = async (req, res) => {
+  try {
+    logger.info("Fetching all users");
+    const users = await User.find().select("-password");
+    res.status(200).json(users);
+  } catch (error) {
+    logger.error(`Error fetching users: ${error.message}`);
+    res
+      .status(500)
+      .json({ message: "Error fetching users", error: error.message });
+  }
+};
+
+// Get user by ID
+exports.getUserById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    logger.info(`Fetching user with ID: ${id}`);
+    const user = await User.findById(id).select("-password");
+    if (!user) {
+      logger.warn(`User not found with ID: ${id}`);
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    logger.error(`Error fetching user with ID ${id}: ${error.message}`);
+    res
+      .status(500)
+      .json({ message: "Error fetching user", error: error.message });
+  }
+};
+
+// Update user
+exports.updateUser = async (req, res) => {
+  const { id } = req.params;
+  const { name, email } = req.body;
+  try {
+    logger.info(`Updating user with ID: ${id}`);
+    const user = await User.findById(id);
+    if (!user) {
+      logger.warn(`User not found with ID: ${id}`);
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.name = name || user.name;
+    user.email = email || user.email;
+    const updatedUser = await user.save();
+
+    logger.info(`User successfully updated with ID: ${id}`);
+    res
+      .status(200)
+      .json({ message: "User updated successfully", user: updatedUser });
+  } catch (error) {
+    logger.error(`Error updating user with ID ${id}: ${error.message}`);
+    res
+      .status(500)
+      .json({ message: "Error updating user", error: error.message });
+  }
+};
+
+// Delete user
+exports.deleteUser = async (req, res) => {
+  const { id } = req.params;
+  try {
+    logger.info(`Deleting user with ID: ${id}`);
+    const user = await User.findById(id);
+    if (!user) {
+      logger.warn(`User not found with ID: ${id}`);
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    await user.remove();
+    logger.info(`User successfully deleted with ID: ${id}`);
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    logger.error(`Error deleting user with ID ${id}: ${error.message}`);
+    res
+      .status(500)
+      .json({ message: "Error deleting user", error: error.message });
+  }
+};
