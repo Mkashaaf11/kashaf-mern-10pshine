@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getNote } from "../../services/notesService";
-import { ArrowLeft, FileText, Edit3, Clock } from "lucide-react";
+import { ArrowLeft, FileText, Edit3, Clock, Download } from "lucide-react";
+import html2pdf from "html2pdf.js";
 
 const NoteDetails = () => {
   const { noteId } = useParams();
@@ -34,6 +35,19 @@ const NoteDetails = () => {
       fetchNoteDetails(noteId);
     }
   }, [noteId]);
+
+  const handleExportPDF = () => {
+    const content = document.getElementById("note-content");
+    const opt = {
+      margin: [10, 10],
+      filename: `${note.title}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+    };
+
+    html2pdf().set(opt).from(content).save();
+  };
 
   if (loading) {
     return (
@@ -101,17 +115,26 @@ const NoteDetails = () => {
             <ArrowLeft className="h-5 w-5" />
             Back to Dashboard
           </button>
-          <button
-            onClick={() => navigate(`/notes/add/${noteId}`)}
-            className="flex items-center gap-2 text-[#2ab6ac] hover:text-[#239d94] transition-colors duration-200"
-          >
-            <Edit3 className="h-5 w-5" />
-            Edit Note
-          </button>
+          <div className="flex gap-4">
+            <button
+              onClick={handleExportPDF}
+              className="flex items-center gap-2 text-[#2ab6ac] hover:text-[#239d94] transition-colors duration-200"
+            >
+              <Download className="h-5 w-5" />
+              Download PDF
+            </button>
+            <button
+              onClick={() => navigate(`/notes/add/${noteId}`)}
+              className="flex items-center gap-2 text-[#2ab6ac] hover:text-[#239d94] transition-colors duration-200"
+            >
+              <Edit3 className="h-5 w-5" />
+              Edit Note
+            </button>
+          </div>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          <div className="p-6">
+          <div className="p-6" id="note-content">
             <h1 className="text-3xl font-bold text-gray-800 mb-4">
               {note.title}
             </h1>
