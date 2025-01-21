@@ -2,16 +2,19 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const logger = require("../utils/logger");
 
-dotenv.config();
+const envFile = process.env.NODE_ENV === "test" ? ".env.test" : ".env";
+dotenv.config({ path: envFile });
+
+const dbName = process.env.DB_NAME || "kashaf_mern_10pshine";
+const mongoUriWithDb = `${process.env.MONGO_URI}${dbName}`;
 
 const db = async () => {
   try {
-    mongoose.connect(process.env.MONGO_URI, {
-      dbName: "kashaf_mern_10pshine",
-    });
-    logger.info("Connected to MongoDB Atlas");
-  } catch (error) {
-    logger.error(`Error connecting to MongoDB: ${err}`);
+    await mongoose.connect(mongoUriWithDb);
+    logger.info(`Connected to MongoDB: ${dbName}`);
+  } catch (err) {
+    logger.error(`Error connecting to MongoDB: ${err.message}`);
+    process.exit(1);
   }
 };
 
