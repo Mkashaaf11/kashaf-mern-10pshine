@@ -38,23 +38,28 @@ exports.getUserById = async (req, res) => {
 // Update user
 exports.updateUser = async (req, res) => {
   const { id } = req.params;
-  const { name, email, oldPassword, newPassword } = req.body;
+  const { currentPassword, newPassword } = req.body;
+  console.log("req body:", req.body);
 
   try {
     const user = await User.findById(id);
+    console.log(user);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    user.name = name || user.name;
-    user.email = email || user.email;
+    user.name = user.name;
+    user.email = user.email;
 
-    if (oldPassword && newPassword) {
-      const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (currentPassword && newPassword) {
+      console.log("hehe");
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      console.log(isMatch);
       if (!isMatch) {
         return res.status(400).json({ message: "Incorrect old password" });
       }
-      user.password = await bcrypt.hash(newPassword, 10);
+      user.password = newPassword;
+      console.log(user);
     }
 
     const updatedUser = await user.save();
