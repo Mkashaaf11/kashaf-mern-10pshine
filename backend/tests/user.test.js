@@ -6,12 +6,18 @@ const app = require("../server");
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const {
+  testUser,
+  wrongUser,
+  newPassword,
+  resetToken,
+} = require("./testConstants");
 
 chai.use(chaiHttp);
 const { expect } = chai;
 
 describe("User Controller", () => {
-  let testUser;
+  let createdTestUser;
   let authToken;
 
   before(async () => {
@@ -19,23 +25,23 @@ describe("User Controller", () => {
   });
 
   beforeEach(async () => {
-    const hashedPassword = await bcrypt.hash("password123", 10);
-    testUser = await User.create({
-      name: "Test User",
+    const hashedPassword = await bcrypt.hash(testUser.password, 10);
+    createdTestUser = await User.create({
+      name: testUser.name,
       email: `test${Date.now()}@example.com`,
       password: hashedPassword,
     });
 
-    authToken = jwt.sign({ id: testUser._id }, process.env.JWT_SECRET, {
+    authToken = jwt.sign({ id: createdTestUser._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
-    console.log("Test user created:", testUser._id);
+    console.log("Test user created:", createdTestUser._id);
     console.log("Generated Token:", authToken);
   });
 
   afterEach(async () => {
-    await User.deleteOne({ _id: testUser._id });
+    await User.deleteOne({ _id: createdTestUser._id });
   });
 
   after(async () => {
@@ -66,11 +72,11 @@ describe("User Controller", () => {
     it("should get a user by ID", async () => {
       const res = await chai
         .request(app)
-        .get(`/api/user/${testUser._id}`)
+        .get(`/api/user/${createdTestUser._id}`)
         .set("Authorization", `Bearer ${authToken}`);
 
       expect(res).to.have.status(200);
-      expect(res.body).to.have.property("name", "Test User");
+      expect(res.body).to.have.property("name", "Test user");
     });
 
     it("should return 404 if user is not found", async () => {
@@ -89,25 +95,25 @@ describe("User Controller", () => {
     it("should update a user", async () => {
       const res = await chai
         .request(app)
-        .put(`/api/user/${testUser._id}`)
+        .put(`/api/user/${createdTestUser._id}`)
         .set("Authorization", `Bearer ${authToken}`)
         .send({
-          name: "Updated Name",
+          name: "Test user",
         });
 
       expect(res).to.have.status(200);
       expect(res.body).to.have.property("message", "User updated successfully");
-      expect(res.body.user).to.have.property("name", "Updated Name");
+      expect(res.body.user).to.have.property("name", "Test user");
     });
 
     it("should not update password without correct old password", async () => {
       const res = await chai
         .request(app)
-        .put(`/api/user/${testUser._id}`)
+        .put(`/api/user/${createdTestUser._id}`)
         .set("Authorization", `Bearer ${authToken}`)
         .send({
-          oldPassword: "wrongpassword",
-          newPassword: "newpassword123",
+          currentPassword: wrongUser.password,
+          newPassword: newPassword,
         });
 
       expect(res).to.have.status(400);
@@ -119,14 +125,13 @@ describe("User Controller", () => {
     it("should delete a user", async () => {
       const res = await chai
         .request(app)
-        .delete(`/api/user/${testUser._id}`)
+        .delete(`/api/user/${createdTestUser._id}`)
         .set("Authorization", `Bearer ${authToken}`);
 
       expect(res).to.have.status(200);
       expect(res.body).to.have.property("message", "User deleted successfully");
 
-      // Verify user is deleted
-      const deletedUser = await User.findById(testUser._id);
+      const deletedUser = await User.findById(createdTestUser._id);
       expect(deletedUser).to.be.null;
     });
   });

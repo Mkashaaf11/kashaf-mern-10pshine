@@ -6,69 +6,63 @@ const User = require("../models/user");
 const Note = require("../models/note");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { testUser, noteData } = require("./testConstants");
 
 chai.use(chaiHttp);
 const { expect } = chai;
 
 describe("Notes Controller", () => {
-  let testUser;
+  let createdTestUser;
   let authToken;
   let testNote;
 
-  // Run once before all tests
   before(async () => {
-    // Create test user
-    const hashedPassword = await bcrypt.hash("password123", 10);
-    testUser = await User.create({
-      name: "Test User",
+    const hashedPassword = await bcrypt.hash(testUser.password, 10);
+    createdTestUser = await User.create({
+      name: testUser.name,
       email: `test${Date.now()}@example.com`,
       password: hashedPassword,
     });
 
-    // Generate authentication token
-    authToken = jwt.sign({ id: testUser._id }, process.env.JWT_SECRET, {
+    authToken = jwt.sign({ id: createdTestUser._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
   });
 
-  // Clean up after all tests
   after(async () => {
-    await Note.deleteMany({ user: testUser._id });
-    await User.deleteOne({ _id: testUser._id });
+    await Note.deleteMany({ user: createdTestUser._id });
+    await User.deleteOne({ _id: createdTestUser._id });
   });
 
   describe("POST /api/notes", () => {
     it("should create a new note", async () => {
-      const noteData = {
-        title: "Test Note",
-        content: "This is a test note content",
-      };
-
       const res = await chai
         .request(app)
         .post("/api/notes")
         .set("Authorization", `Bearer ${authToken}`)
-        .send(noteData);
+        .send(noteData.validNote);
 
       expect(res).to.have.status(201);
       expect(res.body).to.have.property("success", true);
-      expect(res.body.note).to.have.property("title", noteData.title);
-      expect(res.body.note).to.have.property("content", noteData.content);
-      expect(res.body.note).to.have.property("user", testUser._id.toString());
+      expect(res.body.note).to.have.property("title", noteData.validNote.title);
+      expect(res.body.note).to.have.property(
+        "content",
+        noteData.validNote.content
+      );
+      expect(res.body.note).to.have.property(
+        "user",
+        createdTestUser._id.toString()
+      );
 
-      testNote = res.body.note; // Save for later tests
+      testNote = res.body.note;
     });
 
     it("should not create a note without title", async () => {
-      const noteData = {
-        content: "This is a test note content",
-      };
-
       const res = await chai
         .request(app)
         .post("/api/notes")
         .set("Authorization", `Bearer ${authToken}`)
-        .send(noteData);
+        .send(noteData.missingTitle);
 
       expect(res).to.have.status(400);
       expect(res.body).to.have.property("success", false);
@@ -79,12 +73,10 @@ describe("Notes Controller", () => {
     });
 
     it("should not create a note without authentication", async () => {
-      const noteData = {
-        title: "Test Note",
-        content: "This is a test note content",
-      };
-
-      const res = await chai.request(app).post("/api/notes").send(noteData);
+      const res = await chai
+        .request(app)
+        .post("/api/notes")
+        .send(noteData.validNote);
 
       expect(res).to.have.status(401);
       expect(res.body).to.have.property("message", "Not authorized, no token");
@@ -140,21 +132,22 @@ describe("Notes Controller", () => {
 
   describe("PUT /api/notes/:id", () => {
     it("should update a note", async () => {
-      const updateData = {
-        title: "Updated Test Note",
-        content: "This is updated content",
-      };
-
       const res = await chai
         .request(app)
         .put(`/api/notes/${testNote._id}`)
         .set("Authorization", `Bearer ${authToken}`)
-        .send(updateData);
+        .send(noteData.updatedNote);
 
       expect(res).to.have.status(200);
       expect(res.body).to.have.property("success", true);
-      expect(res.body.note).to.have.property("title", updateData.title);
-      expect(res.body.note).to.have.property("content", updateData.content);
+      expect(res.body.note).to.have.property(
+        "title",
+        noteData.updatedNote.title
+      );
+      expect(res.body.note).to.have.property(
+        "content",
+        noteData.updatedNote.content
+      );
       expect(res.body.note).to.have.property("updatedAt");
     });
 
@@ -187,7 +180,6 @@ describe("Notes Controller", () => {
       expect(res.body).to.have.property("success", true);
       expect(res.body).to.have.property("message", "Note deleted");
 
-      // Verify note is deleted
       const deletedNote = await Note.findById(testNote._id);
       expect(deletedNote).to.be.null;
     });

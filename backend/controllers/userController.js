@@ -39,7 +39,6 @@ exports.getUserById = async (req, res) => {
 exports.updateUser = async (req, res) => {
   const { id } = req.params;
   const { currentPassword, newPassword } = req.body;
-  console.log("req body:", req.body);
 
   try {
     const user = await User.findById(id);
@@ -52,14 +51,12 @@ exports.updateUser = async (req, res) => {
     user.email = user.email;
 
     if (currentPassword && newPassword) {
-      console.log("hehe");
       const isMatch = await bcrypt.compare(currentPassword, user.password);
-      console.log(isMatch);
+
       if (!isMatch) {
         return res.status(400).json({ message: "Incorrect old password" });
       }
       user.password = newPassword;
-      console.log(user);
     }
 
     const updatedUser = await user.save();
