@@ -42,7 +42,6 @@ exports.updateUser = async (req, res) => {
 
   try {
     const user = await User.findById(id);
-    console.log(user);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

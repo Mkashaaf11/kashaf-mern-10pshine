@@ -18,19 +18,21 @@ const NotesList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [showFilters, setShowFilters] = useState(false);
+  const [error, setError] = useState(false);
   const navigate = useNavigate();
 
   const fetchNotes = useCallback(async () => {
     try {
       setLoading(true);
+      setError(false);
       const response = await getNotes();
       if (response.success) {
         setNotes(response.notes);
       } else {
-        console.error("Failed to fetch notes:", response);
+        setError(true);
       }
     } catch (error) {
-      console.error("Error fetching notes:", error);
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -46,16 +48,17 @@ const NotesList = () => {
 
   const handleDeleteNote = async (noteId) => {
     try {
+      setError(false);
       const response = await removeNote(noteId);
       if (response.success) {
         setNotes((prevNotes) =>
           prevNotes.filter((currentNote) => currentNote._id !== noteId)
         );
       } else {
-        console.error("Failed to delete note:", response);
+        setError(true);
       }
     } catch (error) {
-      console.error("Error deleting note:", error);
+      setError(true);
     }
   };
 
@@ -103,6 +106,16 @@ const NotesList = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-gray-500">Loading notes...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-red-500 text-lg font-medium">
+          Oops! Something went wrong. Please try again later.
+        </div>
       </div>
     );
   }

@@ -9,6 +9,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const handleLogout = useCallback(() => {
@@ -22,11 +23,10 @@ export const AuthProvider = ({ children }) => {
     async (userId) => {
       try {
         const userData = await getUser(userId);
-        console.log("userData:", userData);
 
         setUser(userData);
       } catch (err) {
-        console.error("Failed to fetch user data:", err);
+        setError(err);
         handleLogout();
       } finally {
         setLoading(false);
@@ -41,7 +41,6 @@ export const AuthProvider = ({ children }) => {
     if (storedToken) {
       try {
         const decoded = jwtDecode(storedToken);
-        console.log("Decoded token:", decoded);
 
         const currentTime = Date.now() / 1000;
         if (decoded.exp < currentTime) {
@@ -50,7 +49,7 @@ export const AuthProvider = ({ children }) => {
           fetchUserData(decoded.id);
         }
       } catch (err) {
-        console.error("Invalid token:", err);
+        setError(err);
         handleLogout();
       }
     } else {
@@ -83,9 +82,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginProvider, logout }}>
-      {children}
-    </AuthContext.Provider>
+    <>
+      {error && (
+        <div className="text-red-500">An error occurred: {error.message}</div>
+      )}
+
+      <AuthContext.Provider value={{ user, loading, loginProvider, logout }}>
+        {children}
+      </AuthContext.Provider>
+    </>
   );
 };
 

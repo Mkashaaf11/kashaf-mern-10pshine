@@ -20,11 +20,9 @@ const NoteDetails = () => {
         setNote(response.note);
       } else {
         setError("Failed to fetch note details");
-        console.error("Failed to fetch note:", response);
       }
     } catch (error) {
       setError("Error loading note details");
-      console.error("Error fetching note details:", error);
     } finally {
       setLoading(false);
     }

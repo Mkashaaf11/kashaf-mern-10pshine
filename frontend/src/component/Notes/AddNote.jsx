@@ -25,11 +25,9 @@ const NoteEditor = () => {
         setContent(note.content);
       } else {
         setError("Failed to fetch note");
-        console.error("Failed to fetch note:", response);
       }
     } catch (error) {
       setError("Error loading note");
-      console.error("Error fetching note data:", error);
     } finally {
       setLoading(false);
     }
@@ -58,7 +56,7 @@ const NoteEditor = () => {
       navigate("/dashboard");
     } catch (error) {
       setError("Failed to save note");
-      console.error("Error saving note:", error);
+
       setSaving(false);
     }
   };

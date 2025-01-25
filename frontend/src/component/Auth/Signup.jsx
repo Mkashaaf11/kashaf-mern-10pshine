@@ -16,7 +16,6 @@ const Signup = () => {
     e.preventDefault();
     try {
       const { message } = await signupService(name, email, password);
-      console.log(message);
       alert(message);
       window.location.href = "/auth/login";
     } catch (err) {

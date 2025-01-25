@@ -18,15 +18,12 @@ const ProfilePage = () => {
     const fetchProfileData = async () => {
       try {
         if (!user) {
-          console.log("No user found in context");
           return;
         }
-
         const userData = await getUser(user._id);
         setProfileData(userData);
         setEditName(userData.name);
       } catch (err) {
-        console.error("Error fetching profile data:", err);
         setError("Failed to load profile data");
       }
     };
@@ -78,7 +75,6 @@ const ProfilePage = () => {
       setCurrentPassword("");
       setNewPassword("");
     } catch (err) {
-      console.error("Error saving changes:", err);
       setError(
         err.response?.data?.message ||
           "Failed to update profile. Please check your inputs."
