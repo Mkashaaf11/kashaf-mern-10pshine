@@ -20,7 +20,7 @@ const Home = () => {
         </p>
         <button
           onClick={handleGetStarted}
-          className="bg-blue-500 text-white px-6 py-3 rounded-lg text-lg hover:bg-blue-600"
+          className="bg-[#2ab6ac] text-white px-6 py-3 rounded-lg text-lg hover:bg-blue-600"
         >
           Get Started
         </button>

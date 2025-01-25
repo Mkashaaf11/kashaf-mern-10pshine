@@ -1,28 +1,26 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import AuthLayout from "./AuthLayout";
 import InputField from "./InputField";
 import Button from "./Button";
 import { Mail, Lock, User } from "lucide-react";
-//import { signup as signupService } from "../../services/authService";
-//import AuthContext from "../../services/context/authContext";
+import { signup as signupService } from "../../services/authService";
+import { Link } from "react-router-dom";
 
 const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  // const { login } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
-    // e.preventDefault();
-    // try {
-    //   const { token, message } = await signupService(name, email, password);
-    //   login({ email, name }, token);
-    //   alert(message);
-    //   window.location.href = "/dashboard";
-    // } catch (err) {
-    //   setError(err.response?.data?.message || "Signup failed");
-    // }
+    e.preventDefault();
+    try {
+      const { message } = await signupService(name, email, password);
+      alert(message);
+      window.location.href = "/auth/login";
+    } catch (err) {
+      setError(err.response?.data?.message || "Signup failed");
+    }
   };
 
   return (
@@ -52,6 +50,14 @@ const Signup = () => {
         />
         <Button type="submit">Create account</Button>
       </form>
+      <div className="mt-6 text-center">
+        <p className="text-gray-500">
+          Already have an account?{" "}
+          <Link to="/auth/login" className="text-blue-500 hover:underline">
+            Login here
+          </Link>
+        </p>
+      </div>
     </AuthLayout>
   );
 };

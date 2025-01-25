@@ -4,11 +4,13 @@ import InputField from "./InputField";
 import Button from "./Button";
 import { Lock } from "lucide-react";
 import { resetPassword } from "../../services/authService";
+import { useParams } from "react-router-dom";
 
-const ResetPassword = ({ token }) => {
+const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const { token } = useParams();
 
   const handleSubmit = async (e) => {
     e.preventDefault();

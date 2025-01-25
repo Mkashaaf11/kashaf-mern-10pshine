@@ -3,26 +3,27 @@ import AuthLayout from "./AuthLayout";
 import InputField from "./InputField";
 import Button from "./Button";
 import { Mail, Lock } from "lucide-react";
-//import { login as loginService } from "../../services/authService";
-//import AuthContext from "../../services/context/authContext";
-import { Link } from "react-router-dom";
+import { login as loginService } from "../../services/authService";
+import AuthContext from "../../services/context/authContext";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  //const { login } = useContext(AuthContext);
+  const { loginProvider } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    // e.preventDefault();
-    // try {
-    //   const { token, message } = await loginService(email, password);
-    //   login({ email }, token);
-    //   alert(message);
-    //   window.location.href = "/dashboard";
-    // } catch (err) {
-    //   setError(err.response?.data?.message || "Login failed");
-    // }
+    e.preventDefault();
+    try {
+      const { token, message } = await loginService(email, password);
+      loginProvider({ email }, token);
+      alert(message);
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed");
+    }
   };
 
   return (

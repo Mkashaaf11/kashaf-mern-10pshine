@@ -1,12 +1,15 @@
 const express = require("express");
 const connectDB = require("./config/db");
+const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const notesRoutes = require("./routes/notesRoutes");
+const userRoutes = require("./routes/userRoutes");
 const logger = require("./utils/logger");
 const requestLogger = require("./middlewares/requestLogger");
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 app.use(requestLogger);
 connectDB();
 
@@ -17,6 +20,9 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/notes", notesRoutes);
+app.use("/api/user", userRoutes);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5002;
 app.listen(PORT, () => logger.info(`Server running on port ${PORT}`));
+
+module.exports = app;

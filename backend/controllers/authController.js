@@ -61,7 +61,13 @@ exports.login = async (req, res) => {
       expiresIn: "1h",
     });
     logger.info(`User "${email}" successfully logged in`);
-    res.status(200).json({ message: "Login successful", token });
+    res
+      .status(200)
+      .json({
+        message: "Login successful",
+        token,
+        user: { email: user.email, name: user.name },
+      });
   } catch (error) {
     logger.error(`Error during login for email "${email}": ${error.message}`);
     res.status(500).json({ message: "Error logging in", error: error.message });
@@ -84,9 +90,8 @@ exports.forgotPassword = async (req, res) => {
     user.resetTokenExpiry = Date.now() + 3600000; // 1 hour expiry
     await user.save();
 
-    const resetUrl = `${req.protocol}://${req.get(
-      "host"
-    )}/api/auth/reset-password/${resetToken}`;
+    const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+    const resetUrl = `${FRONTEND_URL}/auth/reset-password/${resetToken}`;
     await sendEmail(
       email,
       "Password Reset",
